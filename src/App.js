@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from './supabase';
 
 function VillaCard({ villa, onCardClick }) {
   return (
@@ -778,9 +779,324 @@ function VillaPreviewModal({ villa, onClose }) {
   );
 }
 
-function HostDashboard({ villas, bookingRequests, onVillaUpdate }) {
+function NewVillaForm({ onSave, onCancel }) {
+  const [newVilla, setNewVilla] = useState({
+    title: '',
+    pricePerNight: '',
+    description: '',
+    location: '',
+    maxGuests: 2,
+    amenities: []
+  });
+
+  const availableAmenities = [
+    'Pool', 'Ocean View', 'WiFi', 'Air Conditioning', 'Kitchen', 
+    'Parking', 'Beach Access', 'Garden', 'Balcony', 'Gym'
+  ];
+
+  const handleAmenityToggle = (amenity) => {
+    setNewVilla({
+      ...newVilla,
+      amenities: newVilla.amenities.includes(amenity)
+        ? newVilla.amenities.filter(a => a !== amenity)
+        : [...newVilla.amenities, amenity]
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({
+      ...newVilla,
+      pricePerNight: parseInt(newVilla.pricePerNight)
+    });
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '8px',
+        width: '500px',
+        maxWidth: '90%',
+        maxHeight: '90%',
+        overflowY: 'auto'
+      }}>
+        <h2>Add New Villa</h2>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Villa Name:
+            </label>
+            <input
+              type="text"
+              value={newVilla.title}
+              onChange={(e) => setNewVilla({
+                ...newVilla,
+                title: e.target.value
+              })}
+              placeholder="e.g., Sunset Paradise Villa"
+              style={{
+                width: '100%',
+                padding: '8px',
+                fontSize: '16px',
+                border: '1px solid #ccc',
+                borderRadius: '4px'
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Location:
+            </label>
+            <input
+              type="text"
+              value={newVilla.location}
+              onChange={(e) => setNewVilla({
+                ...newVilla,
+                location: e.target.value
+              })}
+              placeholder="e.g., Uluwatu, Bali"
+              style={{
+                width: '100%',
+                padding: '8px',
+                fontSize: '16px',
+                border: '1px solid #ccc',
+                borderRadius: '4px'
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+              Description:
+            </label>
+            <textarea
+              value={newVilla.description}
+              onChange={(e) => setNewVilla({
+                ...newVilla,
+                description: e.target.value
+              })}
+              placeholder="Describe your villa's unique features, views, and what makes it special..."
+              style={{
+                width: '100%',
+                padding: '8px',
+                fontSize: '16px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                minHeight: '100px',
+                resize: 'vertical'
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Price per Night ($):
+              </label>
+              <input
+                type="number"
+                value={newVilla.pricePerNight}
+                onChange={(e) => setNewVilla({
+                  ...newVilla,
+                  pricePerNight: e.target.value
+                })}
+                placeholder="e.g., 450"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '16px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px'
+                }}
+                min="1"
+                required
+              />
+            </div>
+
+            <div style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                Max Guests:
+              </label>
+              <select
+                value={newVilla.maxGuests}
+                onChange={(e) => setNewVilla({
+                  ...newVilla,
+                  maxGuests: parseInt(e.target.value)
+                })}
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  fontSize: '16px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px'
+                }}
+              >
+                {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                  <option key={num} value={num}>{num} Guest{num > 1 ? 's' : ''}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+              Amenities:
+            </label>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(2, 1fr)', 
+              gap: '10px',
+              padding: '10px',
+              border: '1px solid #eee',
+              borderRadius: '4px',
+              backgroundColor: '#f9f9f9'
+            }}>
+              {availableAmenities.map(amenity => (
+                <label key={amenity} style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={newVilla.amenities.includes(amenity)}
+                    onChange={() => handleAmenityToggle(amenity)}
+                    style={{ marginRight: '8px' }}
+                  />
+                  {amenity}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <button
+              type="button"
+              onClick={onCancel}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Create Villa
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function DeleteConfirmModal({ villa, onConfirm, onCancel }) {
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '8px',
+        width: '400px',
+        maxWidth: '90%',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ color: '#dc3545', marginBottom: '15px' }}>Delete Villa</h2>
+        <p style={{ marginBottom: '20px', lineHeight: '1.5' }}>
+          Are you sure you want to delete <strong>"{villa.title}"</strong>?
+        </p>
+        <p style={{ 
+          marginBottom: '25px', 
+          fontSize: '14px', 
+          color: '#666',
+          lineHeight: '1.4'
+        }}>
+          This action cannot be undone. The villa will be permanently removed from your listings and will no longer be visible to guests.
+        </p>
+        
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(villa.id)}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Delete Villa
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HostDashboard({ villas, bookingRequests, onVillaUpdate, onVillaCreate, onVillaDelete }) {
   const [editingVillaId, setEditingVillaId] = useState(null);
   const [previewVillaId, setPreviewVillaId] = useState(null);
+  const [showNewVillaForm, setShowNewVillaForm] = useState(false);
+  const [deletingVillaId, setDeletingVillaId] = useState(null);
 
   const handleEditClick = (villaId) => {
     setEditingVillaId(villaId);
@@ -790,13 +1106,39 @@ function HostDashboard({ villas, bookingRequests, onVillaUpdate }) {
     setPreviewVillaId(villaId);
   };
 
+  const handleDeleteClick = (villaId) => {
+    setDeletingVillaId(villaId);
+  };
+
+  const handleAddNewClick = () => {
+    setShowNewVillaForm(true);
+  };
+
   const handleSaveEdit = (villaId, updatedData) => {
     onVillaUpdate(villaId, updatedData);
     setEditingVillaId(null);
   };
 
+  const handleSaveNew = (newVillaData) => {
+    onVillaCreate(newVillaData);
+    setShowNewVillaForm(false);
+  };
+
+  const handleConfirmDelete = (villaId) => {
+    onVillaDelete(villaId);
+    setDeletingVillaId(null);
+  };
+
   const handleCancelEdit = () => {
     setEditingVillaId(null);
+  };
+
+  const handleCancelNew = () => {
+    setShowNewVillaForm(false);
+  };
+
+  const handleCancelDelete = () => {
+    setDeletingVillaId(null);
   };
 
   const handleClosePreview = () => {
@@ -805,6 +1147,7 @@ function HostDashboard({ villas, bookingRequests, onVillaUpdate }) {
 
   const editingVilla = villas.find(villa => villa.id === editingVillaId);
   const previewVilla = villas.find(villa => villa.id === previewVillaId);
+  const deletingVilla = villas.find(villa => villa.id === deletingVillaId);
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>Host Dashboard</h1>
@@ -843,7 +1186,8 @@ function HostDashboard({ villas, bookingRequests, onVillaUpdate }) {
                       color: 'white',
                       border: 'none',
                       borderRadius: '4px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      fontSize: '12px'
                     }}
                   >
                     Edit
@@ -852,29 +1196,48 @@ function HostDashboard({ villas, bookingRequests, onVillaUpdate }) {
                     onClick={() => handleViewClick(villa.id)}
                     style={{ 
                       padding: '5px 10px',
+                      marginRight: '5px',
                       backgroundColor: '#28a745',
                       color: 'white',
                       border: 'none',
                       borderRadius: '4px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      fontSize: '12px'
                     }}
                   >
                     View
                   </button>
+                  <button 
+                    onClick={() => handleDeleteClick(villa.id)}
+                    style={{ 
+                      padding: '5px 10px',
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             ))}
-            <button style={{
-              width: '100%',
-              padding: '15px',
-              marginTop: '10px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '16px'
-            }}>
+            <button 
+              onClick={handleAddNewClick}
+              style={{
+                width: '100%',
+                padding: '15px',
+                marginTop: '10px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
               + Add New Villa
             </button>
           </div>
@@ -951,6 +1314,23 @@ function HostDashboard({ villas, bookingRequests, onVillaUpdate }) {
           onClose={handleClosePreview}
         />
       )}
+
+      {/* New Villa Form Modal */}
+      {showNewVillaForm && (
+        <NewVillaForm
+          onSave={handleSaveNew}
+          onCancel={handleCancelNew}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingVilla && (
+        <DeleteConfirmModal
+          villa={deletingVilla}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 }
@@ -960,44 +1340,90 @@ function App() {
   const [currentView, setCurrentView] = useState('guest'); // 'guest' or 'host'
   const [bookingRequests, setBookingRequests] = useState([]);
   
-  const [villas, setVillas] = useState([
-    { 
-      id: 1, 
-      title: "Ocean View Villa", 
-      pricePerNight: 450,
-      description: "Stunning oceanfront villa with panoramic views of the Indian Ocean. Perfect for romantic getaways and peaceful retreats.",
-      location: "Uluwatu, Bali",
-      maxGuests: 4,
-      amenities: ["Pool", "Ocean View", "WiFi", "Kitchen", "Beach Access"]
-    },
-    { 
-      id: 2, 
-      title: "Cliff Edge Retreat", 
-      pricePerNight: 680,
-      description: "Luxurious villa perched on dramatic cliffs with infinity pool and world-class sunset views. Ultimate privacy and elegance.",
-      location: "Uluwatu, Bali",
-      maxGuests: 6,
-      amenities: ["Pool", "Ocean View", "WiFi", "Air Conditioning", "Kitchen", "Gym", "Balcony"]
-    },
-    { 
-      id: 3, 
-      title: "Tropical Paradise Villa", 
-      pricePerNight: 520,
-      description: "Secluded garden villa surrounded by lush tropical vegetation. Traditional Balinese architecture with modern amenities.",
-      location: "Uluwatu, Bali",
-      maxGuests: 8,
-      amenities: ["Pool", "Garden", "WiFi", "Air Conditioning", "Kitchen", "Parking"]
-    }
-  ]);
+  const [villas, setVillas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleVillaUpdate = (villaId, updatedData) => {
-    setVillas(prevVillas => 
-      prevVillas.map(villa => 
-        villa.id === villaId 
-          ? { ...villa, ...updatedData }
-          : villa
-      )
-    );
+    // Load villas from database when app starts
+  useEffect(() => {
+    fetchVillas();
+  }, []);
+
+  const fetchVillas = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('villas')
+        .select('*')
+        .order('id');
+      
+      if (error) throw error;
+
+      setVillas(data || []);
+    } catch (error) {
+      console.error('Error fetching villas:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVillaUpdate = async (villaId, updatedData) => {
+    try {
+      const { error } = await supabase
+        .from('villas')
+        .update(updatedData)
+        .eq('id', villaId);
+
+        if (error) throw error;
+
+        setVillas(prevVillas =>
+          prevVillas.map(villa =>
+            villa.id === villaId
+            ? { ...villa, ...updatedData }
+            : villa
+          )
+        );
+    } catch (error) {
+      console.error('Error updating villa:', error);
+      alert('Failed to update villa. Please try again.');
+    }
+  };
+
+  const handleVillaCreate = async (newVillaData) => {
+    try {
+      const { data, error } = await supabase
+        .from('villas')
+        .insert(newVillaData)
+        .select();
+
+        if (error) throw error;
+
+        setVillas(prevVillas => [...prevVillas, data[0]]);
+
+    } catch (error) {
+      console.error('Error creating villa:', error);
+      alert('Failed to create villa. Please try again.');
+    }
+  };
+
+  const handleVillaDelete = async (villaId) => {
+    try {
+      const { error } = await supabase
+        .from('villas')
+        .delete()
+        .eq('id', villaId);
+      
+      if (error) throw error;
+      
+      // Remove from local state
+      setVillas(prevVillas => prevVillas.filter(villa => villa.id !== villaId));
+      
+      // Clear any related state if the deleted villa was selected
+      if (selectedVillaId === villaId) {
+        setSelectedVillaId(null);
+      }
+    } catch (error) {
+      console.error('Error deleting villa:', error);
+      alert('Failed to delete villa. Please try again.');
+    }
   };
 
   return (
@@ -1061,6 +1487,8 @@ function App() {
           villas={villas}
           bookingRequests={bookingRequests}
           onVillaUpdate={handleVillaUpdate}
+          onVillaCreate={handleVillaCreate}
+          onVillaDelete={handleVillaDelete}
         />
       )}
     </div>
