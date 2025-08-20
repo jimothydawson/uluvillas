@@ -3,7 +3,7 @@ import VillaCard from '../villa/VillaCard';
 import VillaDetail from '../villa/VillaDetail';
 import BookingForm from '../forms/BookingForm';
 
-function GuestSide({ villas, selectedVillaId, setSelectedVillaId }) {
+function GuestSide({ villas, selectedVillaId, setSelectedVillaId, onBookingSubmit }) {
   const selectedVilla = villas.find(villa => villa.id === selectedVillaId);
 
   if (selectedVilla) {
@@ -11,6 +11,7 @@ function GuestSide({ villas, selectedVillaId, setSelectedVillaId }) {
       <VillaDetail 
         villa={selectedVilla} 
         onBackClick={() => setSelectedVillaId(null)}
+        onBookingSubmit={onBookingSubmit}
       />
     );
   }

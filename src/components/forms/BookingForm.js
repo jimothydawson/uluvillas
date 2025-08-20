@@ -1,20 +1,44 @@
 import React, { useState } from 'react';
 
-function BookingForm({ villa }) {
+function BookingForm({ villa, onBookingSubmit }) {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate dates
     if (checkIn && checkOut && new Date(checkOut) <= new Date(checkIn)) {
       alert('Check-out date must be after check-in date');
       return;
     }
 
-    alert(`Booking request for ${villa.title}:\nCheck-in: ${checkIn}\nCheck-out: ${checkOut}\nGuests: ${guests}`);
+    setIsSubmitting(true);
+
+    try {
+      const bookingData = {
+        villa_id: villa.id,
+        villa_title: villa.title,
+        check_in: checkIn,
+        check_out: checkOut,
+        guests: guests,
+        status: 'pending'
+      };
+
+      await onBookingSubmit(bookingData); // Fix: use onBookingSubmit instead of onSubmit
+
+      // Clear form after successful submission
+      setCheckIn('');
+      setCheckOut('');
+      setGuests(1);
+    } catch (error) {
+      console.error('Error submitting booking request:', error);
+      alert('Failed to submit booking request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -36,6 +60,7 @@ function BookingForm({ villa }) {
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
             required
+            min={new Date().toISOString().split('T')[0]}
             style={{
               padding: '8px',
               fontSize: '16px',
@@ -55,6 +80,7 @@ function BookingForm({ villa }) {
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
             required
+            min={checkIn || new Date().toISOString().split('T')[0]}
             style={{
               padding: '8px',
               fontSize: '16px',
@@ -91,18 +117,19 @@ function BookingForm({ villa }) {
 
         <button
           type="submit"
+          disabled={isSubmitting}
           style={{
-            backgroundColor: '#007bff',
+            backgroundColor: isSubmitting ? '#6c757d' : '#007bff',
             color: 'white',
             padding: '12px 24px',
             fontSize: '16px',
             border: 'none',
             borderRadius: '4px',
-            cursor: 'pointer',
+            cursor: isSubmitting ? 'not-allowed' : 'pointer',
             width: '100%'
           }}
         >
-          Request Booking
+          {isSubmitting ? 'Submitting...' : 'Request Booking'}
         </button>
       </form>
     </div>

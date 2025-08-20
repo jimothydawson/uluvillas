@@ -15,6 +15,7 @@ function App() {
     // Load villas from database when app starts
   useEffect(() => {
     fetchVillas();
+    fetchBookingRequests();
   }, []);
 
   const fetchVillas = async () => {
@@ -31,6 +32,40 @@ function App() {
       console.error('Error fetching villas:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBookingRequests = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('booking_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        setBookingRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching booking requests:', error )
+    }
+  }
+
+  const handleBookingRequest = async (bookingData) => {
+    try {
+      const { data, error } = await supabase
+        .from('booking_requests')
+        .insert(bookingData)
+        .select();
+
+        if (error) throw error;
+
+        // Add to local state
+        setBookingRequests(prevRequests => [data[0], ...prevRequests]);
+
+        alert('Booking request submitted successfully!');
+    } catch (error) {
+      console.error('Error creating booking request:', error);
+      alert('Failed to submit booking request. Please try again.');
     }
   };
 
@@ -150,6 +185,7 @@ function App() {
           villas={villas}
           selectedVillaId={selectedVillaId}
           setSelectedVillaId={setSelectedVillaId}
+          onBookingSubmit={handleBookingRequest}
         />
       ) : (
         <HostDashboard 

@@ -1,7 +1,7 @@
 import React from 'react';
 import BookingForm from '../forms/BookingForm';
 
-function VillaDetail({ villa, onBackClick }) {
+function VillaDetail({ villa, onBackClick, onBookingSubmit }) {
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <button 
@@ -101,7 +101,10 @@ function VillaDetail({ villa, onBackClick }) {
         
         {/* Right Column - Booking Form */}
         <div style={{ flex: '0 0 380px' }}>
-          <BookingForm villa={villa} />
+          <BookingForm 
+            villa={villa}
+            onBookingSubmit={onBookingSubmit}
+          />
         </div>
       </div>
     </div>
