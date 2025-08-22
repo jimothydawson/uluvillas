@@ -22,7 +22,7 @@ function GuestSide({ villas, selectedVillaId, setSelectedVillaId, onBookingSubmi
       }
 
       // Max guests filter
-      if (filters.maxGuests && villa.maxGuests > filters.maxGuests) {
+      if (filters.maxGuests && villa.maxGuests < filters.maxGuests) {
         return false;
       }
 

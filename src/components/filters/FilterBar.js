@@ -26,6 +26,12 @@ function FilterBar({ onFilterChange }) {
     });
   };
 
+  const handleClearFilters = () => {
+    setPriceRange([0, 1500]);
+    setMaxGuests('');
+    setSelectedAmenities([]);
+  }
+
   // Update filters when any filter changes
   React.useEffect(() => {
     handleFilterChange();
@@ -39,7 +45,8 @@ function FilterBar({ onFilterChange }) {
       marginBottom: '20px'
     }}>
       <h3 style={{ marginBottom: '15px' }}>Filter Villas</h3>
-      
+      <button
+        onClick={handleClearFilters}>Clear Filters</button>
       {/* Price Range */}
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -58,7 +65,7 @@ function FilterBar({ onFilterChange }) {
       {/* Max Guests */}
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-          Max Guests:
+          Guests:
         </label>
         <select
           value={maxGuests}
@@ -71,11 +78,14 @@ function FilterBar({ onFilterChange }) {
             width: '200px'
           }}
         >
-          <option value="">Any number</option>
-          <option value="2">2 or fewer</option>
-          <option value="4">4 or fewer</option>
-          <option value="6">6 or fewer</option>
-          <option value="8">8 or fewer</option>
+          <option value="">Any</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
         </select>
       </div>
 
@@ -85,8 +95,8 @@ function FilterBar({ onFilterChange }) {
           Amenities:
         </label>
         <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+          display: 'flex', 
+          flexWrap: 'wrap', 
           gap: '10px'
         }}>
           {availableAmenities.map(amenity => (

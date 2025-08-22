@@ -5,7 +5,15 @@ import VillaPreviewModal from '../modals/VillaPreviewModal';
 import NewVillaForm from '../forms/NewVillaForm';
 import DeleteConfirmModal from '../modals/DeleteConfirmModal';
 
-function HostDashboard({ villas, bookingRequests, onVillaUpdate, onVillaCreate, onVillaDelete }) {
+function HostDashboard({ 
+  villas, 
+  bookingRequests, 
+  onVillaUpdate, 
+  onVillaCreate, 
+  onVillaDelete,
+  onBookingAccept,    
+  onBookingDecline    
+}) {
   const [editingVillaId, setEditingVillaId] = useState(null);
   const [previewVillaId, setPreviewVillaId] = useState(null);
   const [showNewVillaForm, setShowNewVillaForm] = useState(false);
@@ -182,25 +190,31 @@ function HostDashboard({ villas, bookingRequests, onVillaUpdate, onVillaCreate, 
                     <strong>Guests:</strong> {request.guests}
                   </p>
                   <div style={{ marginTop: '10px' }}>
-                    <button style={{ 
-                      padding: '5px 15px', 
-                      marginRight: '10px',
-                      backgroundColor: '#28a745',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}>
+                    <button 
+                      onClick={() => onBookingAccept(request.id)}
+                      style={{ 
+                        padding: '5px 15px', 
+                        marginRight: '10px',
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
                       Accept
                     </button>
-                    <button style={{ 
-                      padding: '5px 15px',
-                      backgroundColor: '#dc3545',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}>
+                    <button 
+                      onClick={() => onBookingDecline(request.id)}
+                      style={{ 
+                        padding: '5px 15px',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
                       Decline
                     </button>
                   </div>

@@ -69,6 +69,56 @@ function App() {
     }
   };
 
+  const handleBookingAccept = async (bookingId) => {
+    try {
+      const { error } = await supabase
+        .from('booking_requests')
+        .update({ status: 'accepted' })
+        .eq('id', bookingId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setBookingRequests(prevRequests =>
+        prevRequests.map(request =>
+          request.id === bookingId
+            ? { ...request, status: 'accepted' }
+            : request
+        )
+      );
+      
+      alert('Booking accepted successfully!');
+    } catch (error) {
+      console.error('Error accepting booking:', error);
+      alert('Failed to accept booking. Please try again.');
+    }
+  };
+
+  const handleBookingDecline = async (bookingId) => {
+    try {
+      const { error } = await supabase
+        .from('booking_requests')
+        .update({ status: 'declined' })
+        .eq('id', bookingId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setBookingRequests(prevRequests =>
+        prevRequests.map(request =>
+          request.id === bookingId
+            ? { ...request, status: 'declined' }
+            : request
+        )
+      );
+      
+      alert('Booking declined successfully!');
+    } catch (error) {
+      console.error('Error declining booking:', error);
+      alert('Failed to decline booking. Please try again.');
+    }
+  };
+
   const handleVillaUpdate = async (villaId, updatedData) => {
     try {
       const { error } = await supabase
@@ -194,6 +244,8 @@ function App() {
           onVillaUpdate={handleVillaUpdate}
           onVillaCreate={handleVillaCreate}
           onVillaDelete={handleVillaDelete}
+          onBookingAccept={handleBookingAccept}
+          onBookingDecline={handleBookingDecline}
         />
       )}
     </div>
