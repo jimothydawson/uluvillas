@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 function NewVillaForm({ onSave, onCancel }) {
   const [newVilla, setNewVilla] = useState({
     title: '',
-    pricePerNight: '',
+    pricePerNight: 250,
     description: '',
     location: '',
     maxGuests: 2,
-    amenities: []
+    amenities: [],
+    latitude: -8.8165,                                                       // Default to Uluwatu coordinates
+    longitude: 115.0994
   });
 
   const availableAmenities = [
@@ -26,10 +28,7 @@ function NewVillaForm({ onSave, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({
-      ...newVilla,
-      pricePerNight: parseInt(newVilla.pricePerNight)
-    });
+    onSave(newVilla);
   };
 
   return (
@@ -49,7 +48,7 @@ function NewVillaForm({ onSave, onCancel }) {
         backgroundColor: 'white',
         padding: '30px',
         borderRadius: '8px',
-        width: '500px',
+        width: '600px',
         maxWidth: '90%',
         maxHeight: '90%',
         overflowY: 'auto'
@@ -67,7 +66,6 @@ function NewVillaForm({ onSave, onCancel }) {
                 ...newVilla,
                 title: e.target.value
               })}
-              placeholder="e.g., Sunset Paradise Villa"
               style={{
                 width: '100%',
                 padding: '8px',
@@ -136,9 +134,8 @@ function NewVillaForm({ onSave, onCancel }) {
                 value={newVilla.pricePerNight}
                 onChange={(e) => setNewVilla({
                   ...newVilla,
-                  pricePerNight: e.target.value
+                  pricePerNight: parseInt(e.target.value)
                 })}
-                placeholder="e.g., 450"
                 style={{
                   width: '100%',
                   padding: '8px',
@@ -174,6 +171,62 @@ function NewVillaForm({ onSave, onCancel }) {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Map Coordinates Section */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ marginBottom: '15px' }}>Map Location</h3>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                  Latitude:
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={newVilla.latitude}
+                  onChange={(e) => setNewVilla({
+                    ...newVilla,
+                    latitude: parseFloat(e.target.value)
+                  })}
+                  placeholder="-8.8165"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                  }}
+                  required
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                  Longitude:
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={newVilla.longitude}
+                  onChange={(e) => setNewVilla({
+                    ...newVilla,
+                    longitude: parseFloat(e.target.value)
+                  })}
+                  placeholder="115.0994"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                  }}
+                  required
+                />
+              </div>
+            </div>
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+              💡 Tip: You can get coordinates from Google Maps by right-clicking on a location
+            </p>
           </div>
 
           <div style={{ marginBottom: '20px' }}>
@@ -227,7 +280,7 @@ function NewVillaForm({ onSave, onCancel }) {
               type="submit"
               style={{
                 padding: '10px 20px',
-                backgroundColor: '#28a745',
+                backgroundColor: '#007bff',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',

@@ -19,15 +19,15 @@ function BookingForm({ villa, onBookingSubmit }) {
 
     try {
       const bookingData = {
-        villa_id: villa.id,
-        villa_title: villa.title,
-        check_in: checkIn,
-        check_out: checkOut,
+        villaId: villa.id,    
+        villaTitle: villa.title, 
+        checkIn: checkIn,     
+        checkOut: checkOut,    
         guests: guests,
         status: 'pending'
       };
 
-      await onBookingSubmit(bookingData); // Fix: use onBookingSubmit instead of onSubmit
+      await onBookingSubmit(bookingData);
 
       // Clear form after successful submission
       setCheckIn('');

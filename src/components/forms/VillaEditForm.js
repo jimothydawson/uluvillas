@@ -7,7 +7,9 @@ function VillaEditForm({ villa, onSave, onCancel }) {
     description: villa.description || '',
     location: villa.location || '',
     maxGuests: villa.maxGuests || 2,
-    amenities: villa.amenities || []
+    amenities: villa.amenities || [],
+    latitude: villa.latitude || -8.8165,                                     // Default to Uluwatu coordinates
+    longitude: villa.longitude || 115.0994
   });
 
   const availableAmenities = [
@@ -46,7 +48,7 @@ function VillaEditForm({ villa, onSave, onCancel }) {
         backgroundColor: 'white',
         padding: '30px',
         borderRadius: '8px',
-        width: '500px',
+        width: '600px',
         maxWidth: '90%',
         maxHeight: '90%',
         overflowY: 'auto'
@@ -169,6 +171,62 @@ function VillaEditForm({ villa, onSave, onCancel }) {
                 ))}
               </select>
             </div>
+          </div>
+
+          {/* Map Coordinates Section */}
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ marginBottom: '15px' }}>Map Location</h3>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                  Latitude:
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={editedVilla.latitude}
+                  onChange={(e) => setEditedVilla({
+                    ...editedVilla,
+                    latitude: parseFloat(e.target.value)
+                  })}
+                  placeholder="-8.8165"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                  }}
+                  required
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                  Longitude:
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={editedVilla.longitude}
+                  onChange={(e) => setEditedVilla({
+                    ...editedVilla,
+                    longitude: parseFloat(e.target.value)
+                  })}
+                  placeholder="115.0994"
+                  style={{
+                    width: '100%',
+                    padding: '8px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                  }}
+                  required
+                />
+              </div>
+            </div>
+            <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+              💡 Tip: You can get coordinates from Google Maps by right-clicking on a location
+            </p>
           </div>
 
           <div style={{ marginBottom: '20px' }}>

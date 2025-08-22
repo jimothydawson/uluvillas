@@ -1,41 +1,41 @@
 import React, { useState } from 'react';
+import { Range } from 'react-range';
 
 function FilterBar({ onFilterChange }) {
-  const [priceRange, setPriceRange] = useState([0, 1500]);
-  const [maxGuests, setMaxGuests] = useState('');
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [priceRange, setPriceRange] = useState([0, 1500]);                    // State for price range slider (min, max)
+  const [maxGuests, setMaxGuests] = useState('');                             // State for selected number of guests
+  const [selectedAmenities, setSelectedAmenities] = useState([]);             // State for selected amenities (array of strings)
 
-  const availableAmenities = [
+  const availableAmenities = [                                                // List of all possible amenities that villas can have
     'Pool', 'Ocean View', 'WiFi', 'Air Conditioning', 'Kitchen', 
     'Parking', 'Beach Access', 'Garden', 'Balcony', 'Gym'
   ];
 
-  const handleAmenityToggle = (amenity) => {
-    setSelectedAmenities(prev => 
-      prev.includes(amenity)
-        ? prev.filter(a => a !== amenity)
-        : [...prev, amenity]
+  const handleAmenityToggle = (amenity) => {                                  // Function to add/remove an amenity from the selected list
+    setSelectedAmenities(prev =>                                              // Update the selected amenities state
+      prev.includes(amenity)                                                  // If amenity is already selected
+        ? prev.filter(a => a !== amenity)                                     // Remove it from the array
+        : [...prev, amenity]                                                  // Otherwise add it to the array
     );
   };
 
-  const handleFilterChange = () => {
-    onFilterChange({
-      priceRange,
-      maxGuests: maxGuests ? parseInt(maxGuests) : null,
-      amenities: selectedAmenities
+  const handleFilterChange = () => {                                          // Function to send current filter values to parent component
+    onFilterChange({                                                          // Call the parent function with an object containing all filters
+      priceRange,                                                             // Current price range [min, max]
+      maxGuests: maxGuests ? parseInt(maxGuests) : null,                      // Convert string to number, or null if empty
+      amenities: selectedAmenities                                            // Array of selected amenities
     });
   };
 
-  const handleClearFilters = () => {
-    setPriceRange([0, 1500]);
-    setMaxGuests('');
-    setSelectedAmenities([]);
+  const handleClearFilters = () => {                                          // Function to reset all filters to their default values
+    setPriceRange([0, 1500]);                                                 // Reset price range to full range
+    setMaxGuests('');                                                         // Reset guests to empty (any)
+    setSelectedAmenities([]);                                                 // Reset amenities to empty array (any)
   }
 
-  // Update filters when any filter changes
-  React.useEffect(() => {
-    handleFilterChange();
-  }, [priceRange, maxGuests, selectedAmenities]);
+  React.useEffect(() => {                                                     // Hook that runs whenever filter values change
+    handleFilterChange();                                                     // Send updated filters to parent component
+  }, [priceRange, maxGuests, selectedAmenities]);                             // Dependencies: re-run when any of these change
 
   return (
     <div style={{
@@ -45,24 +45,75 @@ function FilterBar({ onFilterChange }) {
       marginBottom: '20px'
     }}>
       <h3 style={{ marginBottom: '15px' }}>Filter Villas</h3>
-      <button
-        onClick={handleClearFilters}>Clear Filters</button>
-      {/* Price Range */}
+      <button onClick={handleClearFilters}>Clear Filters</button>
+      
       <div style={{ marginBottom: '20px' }}>
-        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+        <label style={{ display: 'block', marginBottom: '15px', fontWeight: 'bold' }}>
           Price Range: ${priceRange[0]} - ${priceRange[1]}
         </label>
-        <input
-          type="range"
-          min="0"
-          max="1500"
-          value={priceRange[1]}
-          onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-          style={{ width: '100%' }}
-        />
+        
+        {/* Dual Range Slider */}
+        <div style={{ padding: '20px 10px' }}>
+          <Range
+            step={50}                                                         // Price increments of $50
+            min={0}                                                           // Minimum possible price
+            max={1500}                                                        // Maximum possible price
+            values={priceRange}                                               // Current selected range [min, max]
+            onChange={(values) => setPriceRange(values)}                      // Update state when slider changes
+            renderTrack={({ props, children }) => (
+              <div
+                onMouseDown={props.onMouseDown}
+                onTouchStart={props.onTouchStart}
+                style={{
+                  ...props.style,
+                  height: '36px',                                             // Height of clickable area
+                  display: 'flex',
+                  width: '100%'
+                }}
+              >
+                <div
+                  ref={props.ref}
+                  style={{
+                    height: '6px',                                            // Height of the track line
+                    width: '100%',
+                    borderRadius: '3px',
+                    background: `linear-gradient(
+                      to right, 
+                      #ccc 0%, 
+                      #ccc ${((priceRange[0] - 0) / (1500 - 0)) * 100}%, 
+                      #007bff ${((priceRange[0] - 0) / (1500 - 0)) * 100}%, 
+                      #007bff ${((priceRange[1] - 0) / (1500 - 0)) * 100}%, 
+                      #ccc ${((priceRange[1] - 0) / (1500 - 0)) * 100}%, 
+                      #ccc 100%
+                    )`,                                                       // Gray track with blue active section
+                    alignSelf: 'center'
+                  }}
+                >
+                  {children}
+                </div>
+              </div>
+            )}
+            renderThumb={({ props, isDragged }) => (
+              <div
+                {...props}
+                style={{
+                  ...props.style,
+                  height: '20px',                                             // Size of the draggable handle
+                  width: '20px',
+                  borderRadius: '50%',
+                  backgroundColor: '#007bff',                                 // Blue handle color
+                  border: '3px solid white',
+                  boxShadow: isDragged ? '0 0 10px rgba(0,123,255,0.5)' : '0 2px 6px rgba(0,0,0,0.1)', // Shadow effect
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              />
+            )}
+          />
+        </div>
       </div>
 
-      {/* Max Guests */}
       <div style={{ marginBottom: '20px' }}>
         <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
           Guests:
@@ -89,7 +140,6 @@ function FilterBar({ onFilterChange }) {
         </select>
       </div>
 
-      {/* Amenities */}
       <div>
         <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
           Amenities:
